@@ -25,32 +25,31 @@ class BaseUnit(ABC):
     @property
     def health_points(self):
         return round(self.hp, 1)
-        # TODO возвращаем аттрибут hp в красивом виде
+        # возвращаем аттрибут hp в красивом виде
 
     @property
     def stamina_points(self):
         return round(self.stamina, 1)
-        # TODO возвращаем аттрибут stamina в красивом виде
+        # возвращаем аттрибут stamina в красивом виде
 
     def equip_weapon(self, weapon: Weapon):
-        # TODO присваиваем нашему герою новое оружие
+        # присваиваем нашему герою новое оружие
         self.weapon = weapon
         return f"{self.name} экипирован оружием {self.weapon.name}"
 
     def equip_armor(self, armor: Armor):
-        # TODO одеваем новую броню
+        # надеваем новую броню
         self.armor = armor
         return f"{self.name} экипирован броней {self.armor.name}"
 
     def _count_damage(self, target: BaseUnit) -> int:
-        # TODO Эта функция должна содержать:
-        #  логику расчета урона игрока
-        #  логику расчета брони цели
-        #  здесь же происходит уменьшение выносливости атакующего при ударе
-        #  и уменьшение выносливости защищающегося при использовании брони
-        #  если у защищающегося нехватает выносливости - его броня игнорируется
-        #  после всех расчетов цель получает урон - target.get_damage(damage)
-        #  и возвращаем предполагаемый урон для последующего вывода пользователю в текстовом виде
+        """
+        Метод содержит логику расчета урона игрока, логику расчета брони, здесь происходит уменьшение выносливости
+        атакующего при ударе и уменьшение выносливости атакующего при использовании брони.
+        Если у защищающегося нехватает выносливости - его броня игнорируется, после всех расчетов цель получает урон.
+        :param target:
+        :return: target.get_damage(damage)
+        """
 
         self.stamina -= self.weapon.stamina_per_hit * self.unit_class.stamina
         damage = self.weapon.damage * self.unit_class.attack
@@ -63,7 +62,10 @@ class BaseUnit(ABC):
         return target.get_damage(damage)
 
     def get_damage(self, damage: int) -> Optional[int]:
-        # TODO получение урона целью
+        """
+        Получение урона целью - уменьшаем значение hp
+        """
+
         #      присваиваем новое значение для аттрибута self.hp
         if damage > 0:
             self.hp -= damage
@@ -89,7 +91,7 @@ class BaseUnit(ABC):
         if self._is_skill_used:
             return "Навык уже использован"
         self._is_skill_used = True
-        return self.unit_class.skill.use(self, target)
+        return self.unit_class.skill.use(user=self, target=target)
 
 
 class PlayerUnit(BaseUnit):
@@ -102,7 +104,6 @@ class PlayerUnit(BaseUnit):
         а также возвращается результат в виде строки
         """
 
-        # TODO результат функции должен возвращать следующие строки:
         if self.stamina * self.unit_class.stamina < self.weapon.stamina_per_hit:
             return (
                 f"{self.name} попытался использовать {self.weapon.name},"
@@ -112,7 +113,7 @@ class PlayerUnit(BaseUnit):
         damage = self._count_damage(target)
         if damage > 0:
             return (
-                f"{self.name} используя {self.weapon.name} пробивает" 
+                f"{self.name} используя {self.weapon.name} пробивает " 
                 f"{target.armor.name} соперника и наносит {damage} урона."
             )
 
@@ -126,14 +127,13 @@ class EnemyUnit(BaseUnit):
 
     def hit(self, target: BaseUnit) -> str:
         """
-        функция удар соперника
-        должна содержать логику применения соперником умения
+        Функция удар соперника
+        Содержит логику применения соперником умения
         (он должен делать это автоматически и только 1 раз за бой).
         Например, для этих целей можно использовать функцию randint из библиотеки random.
         Если умение не применено, противник наносит простой удар, где также используется
         функция _count_damage(target
         """
-        # TODO результат функции должен возвращать результат функции skill.use или же следующие строки:
 
         if not self._is_skill_used and self.stamina >= self.unit_class.skill.stamina and randint(0, 100) < 10:
             return self.use_skill(target)
@@ -148,7 +148,7 @@ class EnemyUnit(BaseUnit):
         if damage > 0:
             return (
                 f"{self.name} используя {self.weapon.name} пробивает "
-                f"{target.armor.name} и наносит Вам {damage} урона."
+                f" {target.armor.name} и наносит Вам {damage} урона."
             )
 
         return (
